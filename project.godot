@@ -10,12 +10,12 @@ config_version=4
 
 _global_script_classes=[ {
 "base": "Node",
-"class": "Virus",
+"class": "DataBase",
 "language": "GDScript",
-"path": "res://sources/scenes/scripts/Virus.gd"
+"path": "res://sources/scenes/scripts/DataBase.gd"
 } ]
 _global_script_class_icons={
-"Virus": ""
+"DataBase": ""
 }
 
 [application]
@@ -26,7 +26,7 @@ config/icon="res://icon.png"
 
 [autoload]
 
-TestObj="*res://sources/scenes/scripts/TestObj.gd"
+Testing="*res://sources/scenes/scripts/Testing.gd"
 
 [display]
 

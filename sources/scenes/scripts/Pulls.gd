@@ -25,7 +25,6 @@ var de: int = 0
 var m: float = 0 # money
 var e: float = 0 # exp
 
-var c: float = 0 # attempt chance
 var all_s: int = 0 # all attempts
 var s: int = 0 # s5 attempt moment
 
@@ -63,10 +62,9 @@ func loading():
 		m = conf.get_value('data', 'm')
 		e = conf.get_value('data', 'e')
 
-		c = conf.get_value('data', 'c')
 		all_s = conf.get_value('data', 'all_s')
 		s = conf.get_value('data', 's')
-	elif l == ERR_FILE_NOT_FOUND:
+	else:
 		create_objects()
 
 func attepts():
@@ -76,11 +74,11 @@ func attepts():
 			all_s += 1
 			s += 1
 			
-			var v: Virus = null
-			
+			var v: DataBase.DBViruses.Virus = null
+
 			while v == null:
 				v = pull()
-			
+
 			list.append(v)
 	
 	var result = "S1: " + str(s1) + "\nS2: " + str(s2) + "\nS3: " + str(s3) + "\nS4: " + str(s4) + "\nS5: " + str(s5) + "\n\nH: " + str(h) + "\nDA: " + str(da) + "\nDE: " + str(de) + "\n\nM: " + str(m) + "\nE: " + str(e)
@@ -106,13 +104,13 @@ func pull():
 		else VIRUS_RARITY.STAR_4 if r_c < 5 && r_c > 1 \
 		else VIRUS_RARITY.STAR_5
 	
-	var v: Virus
+	var v: DataBase.DBViruses.Virus
 	
 	match r:
 		VIRUS_RARITY.STAR_1:
 			v = s1_list[randi() % s1_list.size()] if s1_list.size() != 0 \
 				else null
-			
+
 			if v == null: return v
 			
 			s1 += 1
@@ -120,7 +118,7 @@ func pull():
 		VIRUS_RARITY.STAR_2:
 			v = s2_list[randi() % s2_list.size()] if s2_list.size() != 0 \
 				else null
-			
+
 			if v == null: return v
 			
 			s2 += 1
@@ -128,7 +126,7 @@ func pull():
 		VIRUS_RARITY.STAR_3:
 			v = s3_list[randi() % s3_list.size()] if s3_list.size() != 0 \
 				else null
-			
+
 			if v == null: return v
 			
 			s3 += 1
@@ -136,7 +134,7 @@ func pull():
 		VIRUS_RARITY.STAR_4:
 			v = s4_list[randi() % s4_list.size()] if s4_list.size() != 0 \
 				else null
-			
+
 			if v == null: return v
 			
 			s4 += 1
@@ -144,7 +142,7 @@ func pull():
 		VIRUS_RARITY.STAR_5:
 			v = s5_list[randi() % s5_list.size()] if s5_list.size() != 0 \
 				else null
-			
+
 			if v == null: return v
 			
 			s5 += 1
@@ -191,7 +189,6 @@ func saving():
 	conf.set_value('data', 'm', m)
 	conf.set_value('data', 'e', e)
 	
-	conf.set_value('data', 'c', c)
 	conf.set_value('data', 'all_s', all_s)
 	conf.set_value('data', 's', s)
 	
@@ -202,7 +199,7 @@ func saving():
 func create_objects():
 	for i in range(10):
 		for n in range(10):
-			var v = Virus.new()
+			var v = DataBase.DBVirus.Virus.new()
 			var v_n = str(i) + str(n)
 			
 			v.virus_name = v_n.hash()
