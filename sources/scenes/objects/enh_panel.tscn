@@ -1,0 +1,38 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://sources/themes/def_theme.tres" type="Theme" id=1]
+[ext_resource path="res://sources/scenes/objects/enh_panel.gd" type="Script" id=2]
+
+[node name="enh_panel" type="PanelContainer"]
+margin_right = 14.0
+margin_bottom = 14.0
+theme = ExtResource( 1 )
+script = ExtResource( 2 )
+
+[node name="vb" type="VBoxContainer" parent="."]
+margin_left = 7.0
+margin_top = 7.0
+margin_right = 257.0
+margin_bottom = 168.0
+custom_constants/separation = 10
+alignment = 1
+
+[node name="info" type="Label" parent="vb"]
+margin_right = 250.0
+margin_bottom = 116.0
+rect_min_size = Vector2( 250, 0 )
+size_flags_vertical = 3
+text = "Слепая печать
+Money: 8.000K
+Lvl: 59
+(+0.001 exp)"
+align = 1
+autowrap = true
+
+[node name="buy" type="Button" parent="vb"]
+margin_top = 126.0
+margin_right = 250.0
+margin_bottom = 161.0
+text = "Купить"
+
+[connection signal="pressed" from="vb/buy" to="." method="_on_buy_pressed"]

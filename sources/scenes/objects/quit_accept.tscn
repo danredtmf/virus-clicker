@@ -1,0 +1,59 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://sources/themes/def_theme.tres" type="Theme" id=1]
+[ext_resource path="res://sources/scenes/objects/quit_accept.gd" type="Script" id=2]
+
+[node name="quit_accept" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme = ExtResource( 1 )
+script = ExtResource( 2 )
+
+[node name="bg" type="ColorRect" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color( 0, 0, 0, 0.466667 )
+
+[node name="panel" type="PanelContainer" parent="."]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -96.5
+margin_top = -41.0
+margin_right = 96.5
+margin_bottom = 41.0
+
+[node name="vb" type="VBoxContainer" parent="panel"]
+margin_left = 7.0
+margin_top = 7.0
+margin_right = 186.0
+margin_bottom = 75.0
+
+[node name="Label" type="Label" parent="panel/vb"]
+margin_right = 179.0
+margin_bottom = 29.0
+text = "Выйти из игры?"
+align = 1
+
+[node name="hb" type="HBoxContainer" parent="panel/vb"]
+margin_top = 33.0
+margin_right = 179.0
+margin_bottom = 68.0
+alignment = 1
+
+[node name="yes" type="Button" parent="panel/vb/hb"]
+margin_right = 87.0
+margin_bottom = 35.0
+size_flags_horizontal = 3
+text = "Да"
+
+[node name="no" type="Button" parent="panel/vb/hb"]
+margin_left = 91.0
+margin_right = 179.0
+margin_bottom = 35.0
+size_flags_horizontal = 3
+text = "Нет"
+
+[connection signal="pressed" from="panel/vb/hb/yes" to="." method="_on_yes_pressed"]
+[connection signal="pressed" from="panel/vb/hb/no" to="." method="_on_no_pressed"]

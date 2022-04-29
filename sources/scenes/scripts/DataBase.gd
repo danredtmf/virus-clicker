@@ -1,9 +1,19 @@
 extends Node
 
+const ATTEMPT : int = 1
+const ATTEMPTS : int = ATTEMPT * 9
+
+const EXP_ATTEMPT : float = 0.160
+const EXP_ATTEMPTS : float = EXP_ATTEMPT * 9
+
 var db_enhancements: DBEnhancements = DBEnhancements.new()
 var db_viruses: DBViruses = DBViruses.new()
 var db_stats: DBStats = DBStats.new()
 var db_user: DBUser = DBUser.new()
+
+func _ready():
+	var _temp = OS.request_permissions()
+	var _permissions: Array = OS.get_granted_permissions()
 
 # Хранение списка улучшений по умолчанию
 class DBEnhancements:
@@ -12,51 +22,56 @@ class DBEnhancements:
 	# СCEPC - Crit. Chance Experience Per Click
 	enum ENH_WAY { EPC, CEPC, CCEPC }
 	
-	var _names: Dictionary = {
-		"Слепая печать": {
-			"price": 8, "enh_way": ENH_WAY.EPC,
-			"enh_inc": 0.001
-		}
-	}
-	
 	var _list_enhancements: Array = []
 	
 	func _init():
 		_gen_items()
 	
-	class Enhancements:
-		# enh_way - Что изменяет улучшение
-		# enh_inc - Изменение
-		var id: int
-		var enhancement: String
-		var lvl: int
-		var price: float
-		var enh_way: int
-		var enh_inc: float
+	func _load_names() -> Dictionary:
+		var file: File = File.new()
+		var result: Dictionary
+		var data
+		
+		var l = file.open("res://sources/data/enhs.json", File.READ)
+		if l == OK:
+			data = parse_json(file.get_as_text())
+			if typeof(data) == TYPE_DICTIONARY:
+				result = data
+		
+		return result
 	
 	func _gen_items() -> void:
-		for i in range(_names.size()):
-			var e: Enhancements = Enhancements.new()
+		var names: Dictionary = _load_names()
+		
+		for i in range(names.size()):
+			var e: Enhancement = Enhancement.new()
 			e.id = i
-			e.enhancement = _names.keys()[i]
+			e.enhancement = names.keys()[i]
 			
-			e.price = gen_price(_names.values()[i]["price"])
-			e.enh_way = _names.values()[i]["enh_way"]
+			e.price = gen_price(names.values()[i]["price"])
+			e.enh_way = names.values()[i]["enh_way"]
 			
-			e.enh_inc = gen_enh_inc(_names.values()[i]["enh_inc"])\
-				if e.enh_way == ENH_WAY.CEPC || e.enh_way == ENH_WAY.CCEPC\
-				else _names.values()[i]["enh_inc"]
+			e.enh_inc = gen_enh_inc(names.values()[i]["enh_inc"], e.enh_way)
 			
 			_list_enhancements.append(e)
 	
-	func gen_price(value: float) -> float:
-		var new_price: float = ((value / 100) * 25) + value
+	func gen_price(value: float, lvl: int = 0) -> float:
+		var new_price: float = 0
+		
+		if lvl == 0:
+			new_price = value
+		else:
+			new_price = ((value / 100) * 25) + value
 		
 		return new_price
 	
-	# Для CEPC/CCEPC улучшений
-	func gen_enh_inc(value: float) -> float:
-		var new_value: float = ((value / 100) * 15) + value
+	func gen_enh_inc(value: float, enh_way: int) -> float:
+		var new_value: float = 0
+		
+		if enh_way == ENH_WAY.CEPC || enh_way == ENH_WAY.CCEPC:
+			new_value = ((value / 100) * 15) + value
+		elif enh_way == ENH_WAY.EPC:
+			new_value = value
 		
 		return new_value
 	
@@ -71,28 +86,16 @@ class DBEnhancements:
 
 # Хранение списка вирусов
 class DBViruses:
+	const VIRUS_PRICE_ONE_ATTEMPT: float = 0.160
+	const VIRUS_PRICE_FIVE_ATTEMPT: float = VIRUS_PRICE_ONE_ATTEMPT * 5
+	
 	enum VIRUS_TYPE { HARMLESS, DANGEROUS, DESTRUCTIVE }
 	enum VIRUS_RARITY { STAR_1, STAR_2, STAR_3, STAR_4, STAR_5 }
 	
-	var _names: Dictionary = {
-		"Yoki-417": {"type": VIRUS_TYPE.HARMLESS},
-		"Yoki-1193": {"type": VIRUS_TYPE.HARMLESS},
-	}
 	var _list_viruses: Array = []
 	
 	func _init():
 		_gen_items()
-	
-	class Virus:
-		var id: int
-		var virus: String
-		var type: int
-		var rarity: int
-		var price: float
-		
-		func _to_string() -> String:
-			return 'ID: ' + str(id) + '\n	Name: ' + str(virus) + \
-			'\n	Type: ' + str(type) + '\n	Rarity: ' + str(rarity) + '\n'
 	
 	func gen(iterations: int = 1) -> Array:
 		var array: Array = []
@@ -110,12 +113,27 @@ class DBViruses:
 		
 		return array
 	
+	func _load_names() -> Dictionary:
+		var file: File = File.new()
+		var result: Dictionary
+		var data
+		
+		var l = file.open("res://sources/data/viruses.json", File.READ)
+		if l == OK:
+			data = parse_json(file.get_as_text())
+			if typeof(data) == TYPE_DICTIONARY:
+				result = data
+		
+		return result
+	
 	func _gen_items() -> void:
-		for i in range(_names.size()):
+		var names: Dictionary = _load_names()
+		
+		for i in range(names.size()):
 			var v: Virus = Virus.new()
 			v.id = i
-			v.virus = _names.keys()[i]
-			v.type = _names.values()[i]["type"]
+			v.virus = names.keys()[i]
+			v.type = names.values()[i]["type"]
 			
 			_list_viruses.append(v)
 	
@@ -156,9 +174,9 @@ class DBViruses:
 			DataBase.DBViruses.VIRUS_TYPE.HARMLESS:
 				money += 1
 			DataBase.DBViruses.VIRUS_TYPE.DANGEROUS:
-				money += 2
-			DataBase.DBViruses.VIRUS_TYPE.DESTRUCTIVE:
 				money += 4
+			DataBase.DBViruses.VIRUS_TYPE.DESTRUCTIVE:
+				money += 8
 
 		match v.rarity:
 			DataBase.DBViruses.VIRUS_RARITY.STAR_1:
@@ -208,12 +226,14 @@ class DBStats:
 		conf.set_value('stats', 'ta', total_attempts)
 		conf.set_value('stats', 'ca', current_attempt)
 		
-		conf.save("user://stats")
+		conf.save(OS.get_user_data_dir()+"/stats")
+		
+		print(OS.get_user_data_dir())
 	
 	func loading() -> void:
 		var conf = ConfigFile.new()
 		
-		var l = conf.load("user://stats")
+		var l = conf.load(OS.get_user_data_dir()+"/stats")
 		if l == OK:
 			total_s1_items = conf.get_value('stats', 'ts1i')
 			total_s2_items = conf.get_value('stats', 'ts2i')
@@ -243,8 +263,8 @@ class DBStats:
 
 # Хранение данных пользователя
 class DBUser:
-	var money: float
-	var experience: float = 1.600 * 10 # 0
+	var money: float = 0
+	var experience: float = 0
 	
 	# EPC - Experience Per Click
 	# СEPC - Crit. Experience Per Click
@@ -272,12 +292,12 @@ class DBUser:
 		conf.set_value('user', 'ce', changed_enhancements)
 		conf.set_value('user', 'ovi', opened_viruses_id)
 		
-		conf.save("user://user")
+		conf.save(OS.get_user_data_dir()+"/user")
 	
 	func loading() -> void:
 		var conf = ConfigFile.new()
 		
-		var l = conf.load("user://user")
+		var l = conf.load(OS.get_user_data_dir()+"/user")
 		if l == OK:
 			money = conf.get_value('user', 'm')
 			experience = conf.get_value('user', 'e')
@@ -292,15 +312,25 @@ class DBUser:
 	func add_money(value: float) -> void:
 		money += value
 	
+	# считает монеты после генерации вирусов
 	func get_money(viruses: Array) -> float:
 		var new_money: float = 0
 		
 		for i in viruses:
-			var virus: DBViruses.Virus = i
+			var virus: Virus = i
 			
 			new_money += virus.price
 		
 		return new_money
+	
+	func check_money(value: float) -> bool:
+		if money >= value:
+			return true
+		else:
+			return false
+	
+	func spend_money(value: float) -> void:
+		money -= value
 	
 	func add_experience() -> void:
 		if _check_chance_experience():
